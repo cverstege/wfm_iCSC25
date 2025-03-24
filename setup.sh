@@ -1,0 +1,92 @@
+#!/bin/bash
+#################################################################
+# This script setups all dependencies necessary for running law #
+#################################################################
+
+# determine the directy of this file
+if [ -n "$ZSH_VERSION" ]; then
+    this_file="${(%):-%x}"
+else
+    this_file="${BASH_SOURCE[0]}"
+fi
+this_dir="$( cd "$( dirname "$this_file" )" && pwd )"
+
+source_lcg_stack() {
+    # Check OS and source according LCG Stack
+    local view_base=/cvmfs/sft.cern.ch/lcg/views
+    LCG=LCG_105
+    local prefix
+    local grid_ui
+    local platform
+    source $this_dir/setup/os-version.sh
+    if [[ "$distro" == "CentOS" ]]; then
+        if [[ ${os_version:0:1} == "7" ]]; then
+            echo "CentOS7 is not supported anymore! Use an updated OS."
+            return 1
+            prefix=x86_64-centos7
+            grid_ui="/cvmfs/grid.cern.ch/centos7-ui-160522/etc/profile.d/setup-c7-ui-python3-example.sh"
+            platform=${prefix}-gcc11-opt
+        fi
+    elif [[ "$distro" == "RedHatEnterprise" || "$distro" == "Alma" || "$distro" == "Rocky" ]]; then
+        if [[ ${os_version:0:1} == "9" ]]; then
+            prefix=x86_64-el9
+            grid_ui="/cvmfs/grid.cern.ch/alma9-ui-test/etc/profile.d/setup-alma9-test.sh"
+            platform=${prefix}-gcc13-opt
+        fi
+    elif [[ "$distro" == "Ubuntu" ]]; then
+        if [[ ${os_version:0:2} == "22" ]]; then
+            prefix=x86_64-ubuntu2204
+            platform=${prefix}-gcc11-opt
+        fi
+    fi
+    if [[ -z "$prefix" ]]; then
+        echo "LCG Stack $LCG not available for $distro $os_version"
+        return 1
+    fi
+    local lcg_path=$view_base/$LCG/$platform/setup.sh
+    echo "Sourcing LCG Stack from $lcg_path"
+    # shellcheck disable=SC1090
+    source "$lcg_path"
+    # echo "Applying updates ontop of LCG stack from $lcg_path_updates"
+    # local lcg_path_updates=$view_base/$LCG1/$platform/setup.sh
+    # source "$lcg_path_updates"
+    if [[ $(hostname -d) == "desy.de" && -z "$MCRUN_REMOTE" ]]; then
+       echo "Running at DESY, using DESY grid-ui..."
+       grid_ui="/cvmfs/grid.desy.de/etc/profile.d/grid-ui-env.sh"
+    fi
+    echo "Sourcing grid-ui from $grid_ui"
+    # shellcheck disable=SC1090
+    source "$grid_ui"
+}
+
+action() {
+    # source lcg stack
+    source_lcg_stack
+
+    _addpy() {
+        [ -n "$1" ] && export PYTHONPATH="$1:$PYTHONPATH"
+    }
+    _addbin() {
+        [ -n "$1" ] && export PATH="$1:$PATH"
+    }
+
+    export LAW_HOME="$this_dir/.law"
+    export LAW_CONFIG_FILE="$this_dir/law.cfg"
+    export LUIGI_CONFIG_PATH="$this_dir/luigi.cfg"
+    export ANALYSIS_PATH="$this_dir"
+    export ANALYSIS_DATA_PATH="$this_dir/data"
+
+    # luigi
+    _addpy "$this_dir/luigi"
+    _addbin "$this_dir/luigi/bin"
+
+    # law
+    _addpy "$this_dir/law"
+    _addbin "$this_dir/law/bin"
+
+    # this analysis
+    _addpy "$ANALYSIS_PATH"
+    source "$( law completion )"
+}
+
+action "$@"
