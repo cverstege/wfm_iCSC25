@@ -1,0 +1,6 @@
+[submodule "luigi"]
+	path = luigi
+	url = https://github.com/spotify/luigi.git
+[submodule "law"]
+	path = law
+	url = https://github.com/riga/law.git
