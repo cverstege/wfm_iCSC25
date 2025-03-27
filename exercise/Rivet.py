@@ -9,7 +9,7 @@ from .base import BaseTask
 from .Sherpa import SherpaRun
 
 class RivetCode(law.ExternalTask):
-	def output(self):
+    def output(self):
         # YOUR CODE HERE
         pass
 

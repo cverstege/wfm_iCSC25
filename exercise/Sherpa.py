@@ -15,8 +15,12 @@ class SherpaBuild(BaseTask):
     campaign = luigi.Parameter(default="LHC-LO-ZplusJet")
 
     def requires(self):
+        # YOUR CODE HERE
+        pass
 
     def output(self):
+        # YOUR CODE HERE
+        pass
 
     def run(self):
         # get Sherpa env
