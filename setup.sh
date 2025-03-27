@@ -75,6 +75,7 @@ action() {
     export LUIGI_CONFIG_PATH="$this_dir/luigi.cfg"
     export ANALYSIS_PATH="$this_dir"
     export ANALYSIS_DATA_PATH="$this_dir/data"
+    export RIVET_ANALYSIS_PATH="$ANALYSIS_DATA_PATH/rivet/analyses"
 
     # luigi
     _addpy "$this_dir/luigi"
