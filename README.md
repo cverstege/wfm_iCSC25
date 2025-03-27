@@ -20,3 +20,5 @@ For Sherpa the WF looks like this:
 4. Run Sherpa to create simulated particle collisions. This means, checking if the files from the previous step are in place and running the following command: `["Sherpa", f"-R {seed}", f"-e {self.events_per_job}", "EVENT_OUTPUT=HepMC3_Short[{}]".format(out_file_name)]`. This step can be implemented as a law workflow, to e.g. execute it with HTCondor in the future. Make sure to encode the branch id in your output file name. Otherwise each branch will overwrite the other.
 5. Run Rivet to analyze what we've simulated. Here we can require the SherpaRun workflow and analyse all the simulated events with the following command: `["rivet", f"--histo-file={self.output().abspath}", f"--analysis=ZplusJet_3"] + input_file_paths`
 
+## Some tips
+I provide some helper functions in the `utils.py` file. Feel free to use them and ask for help during the exercise :)
